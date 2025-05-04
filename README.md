@@ -66,12 +66,6 @@ class Page extends StatelessWidget {
     );
   }
 }
-
-// グローバル変数としてStateを管理を行うPorviderを定義
-// StateNotifier クラスを使用して状態管理を行うためのプロバイダー
-final provider =
-    StateNotifierProvider<PageNotifier, PageState>(
-        (ref) => PageNotifier());
 ```
 
 **state定義クラス**
@@ -109,6 +103,12 @@ class pageState {
 ```dart
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+// グローバル変数としてStateを管理を行うPorviderを定義
+// StateNotifier クラスを使用して状態管理を行うためのプロバイダー
+final provider =
+    StateNotifierProvider<PageNotifier, PageState>(
+        (ref) => PageNotifier());
+
 class PageNotifier extends StateNotifier<pageState> {
   PageNotifier() : super(const pageState());
 
@@ -129,7 +129,9 @@ class PageNotifier extends StateNotifier<pageState> {
 ```
 
 **利用場所**
+
 ```dart
+// --- Stateless Widget ---
 // ConsumerWidgetを継承
 class WidgetA extends ConsumerWidget {
   const WidgetA({super.key});
@@ -159,3 +161,32 @@ class WidgetA extends ConsumerWidget {
   }
 }
 ```
+
+```dart
+// --- Stateful Widget ---
+class WidgetA extends ConsumerStatefulWidget {
+  const WidgetA({super.key});
+
+  @override
+  ConsumerState<WidgetA> createState() => _WidgetAState();
+}
+
+class _WidgetAState extends ConsumerState<WidgetA> {
+  ref.read(provider).counter;
+  ref.read(provider.notifier).increment();
+}
+```
+
+## refとwatch
+
+https://zenn.dev/tarakosuziko/articles/39f3ee5f4cf678
+
+- watch
+  - プロバイダの状態を監視し、その状態が変化したときにウィジェットを再描画します。これは、プロバイダの状態をUIに反映させる場合に使われます。
+  - プロバイダの状態をUIに表示したい場合。状態が変わったら、自動的にUIを更新する必要がある場合。
+- read
+  - プロバイダの状態を一度だけ取得し、その状態を操作するために使います。readを使うと、その状態が変わってもウィジェットの再描画は行われません。
+  - プロバイダの状態を使って一度だけ操作したい場合。ボタンのクリックや入力など、ユーザーのアクションに応じて状態を変更したい場合。
+- listen
+  - プロバイダの状態の変更をリスニングし、変更があったときに特定のコールバックを実行します。
+  - ウィジェット全体を再ビルドするのではなく、一度設定したコールバックで必要な処理だけを実行したい場合に使います。
